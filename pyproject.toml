@@ -62,10 +62,16 @@ exclude_lines = [
 profile = "black"
 line_length = 100
 known_first_party = ["afi"]
+extend_skip_glob = ["afi/cite/references/**"]
 
 [tool.black]
 line-length = 100
 target-version = ["py312"]
+extend-exclude = '''
+/(
+    afi/cite/references
+)/
+'''
 
 [tool.bandit]
 exclude_dirs = ["tests"]

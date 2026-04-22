@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/). This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-04-22
+
+### Added
+
+- docs/agentculture.md — description of the AgentCulture OSS org, the agents-as-members model, current project list, and how to contribute.
+- docs/agent-first.md — the Agent First paradigm in depth: the human-vs-agent design reversal, the three interface disciplines (learnability on CLI, minimalism on MCP, discoverability on HTTP), afi-cli's foundational role, the dogfooding loop, and the Agent First review gate.
+
+### Changed
+
+- README.md and CLAUDE.md: link the two new docs so humans and future Claude sessions read the org context before making design decisions.
+- **Policy:** every PR now bumps the version, even docs-only or trivial ones. CLAUDE.md updated, and `.github/workflows/tests.yml` version-check gate no longer skips when only docs/config change. PyPI history and `CHANGELOG.md` now track each merged PR 1:1.
+
 ## [0.1.1] - 2026-04-22
 
 ### Added
@@ -14,7 +26,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- afi/__main__.py: propagate main() exit code via sys.exit(main()) so python -m afi returns non-zero on failure (Qodo #1, Copilot).
+- `afi/__main__.py`: propagate main() exit code via sys.exit(main()) so python -m afi returns non-zero on failure (Qodo #1, Copilot).
 - publish.yml: use uv run python -c for tomllib version read so the dev-version step uses the uv-managed 3.12 interpreter instead of whatever python is on PATH (Qodo #3).
 - publish.yml: guard test-publish on same-repo PRs (head.repo.full_name == github.repository) so fork PRs do not attempt OIDC trusted publishing and fail CI for external contributors (Qodo #4).
 

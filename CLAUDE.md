@@ -13,7 +13,7 @@ Stack (mirrors `../culture` conventions for the AgentCulture OSS org):
 - Tests: `pytest` (+ `pytest-xdist`, `pytest-cov`) under `tests/`.
 - Lint: `flake8` + `flake8-bandit` + `flake8-bugbear`, `pylint`, `bandit`, `black`, `isort` (all in the `dev` dependency group).
 - CI: `tests.yml` (PR), `publish.yml` (TestPyPI on PR, PyPI on push to main — Trusted Publishing / OIDC), `security-checks.yml` (scheduled weekly).
-- Version bump required when `afi/`, `pyproject.toml`, or `tests/` changes — enforced by the `version-check` job in `tests.yml`. Use the repo-local `version-bump` skill (`.claude/skills/version-bump/`) or run `python3 .claude/skills/version-bump/scripts/bump.py {major,minor,patch}` directly; pipe a JSON changelog object via stdin so `CHANGELOG.md` gets a populated entry.
+- **Version bump required on every PR**, even docs-only or trivial changes — enforced by the `version-check` job in `tests.yml`. PyPI history and `CHANGELOG.md` track each merged PR 1:1. Use the repo-local `version-bump` skill (`.claude/skills/version-bump/`) or run `python3 .claude/skills/version-bump/scripts/bump.py {major,minor,patch}` directly; pipe a JSON changelog object via stdin so `CHANGELOG.md` gets a populated entry. Default to `patch` for docs/config/CI; `minor` for new commands or features; `major` for breaking changes.
 
 ## Context
 

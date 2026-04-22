@@ -205,3 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Claude Code (per-user local permissions — shared team settings go in
+# .claude/settings.json, which is NOT ignored)
+.claude/settings.local.json

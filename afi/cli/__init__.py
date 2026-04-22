@@ -19,11 +19,13 @@ import argparse
 import sys
 
 from afi import __version__
-from afi.cli._commands import cli as _cli_group
-from afi.cli._commands import explain as _explain_cmd
-from afi.cli._commands import learn as _learn_cmd
 from afi.cli._errors import EXIT_USER_ERROR, AfiError
 from afi.cli._output import emit_error
+
+# Note: _commands submodules are imported lazily inside :func:`_build_parser`
+# to avoid a circular dependency. afi.cite._engine imports afi.cli._errors;
+# eagerly loading afi.cli._commands.cli (which imports afi.cite) at module
+# init would create a cycle when afi.cite is the first-touched package.
 
 
 class _AfiArgumentParser(argparse.ArgumentParser):
@@ -47,6 +49,11 @@ class _AfiArgumentParser(argparse.ArgumentParser):
 
 
 def _build_parser() -> argparse.ArgumentParser:
+    # Deferred imports (see module-level note): avoids afi.cite ↔ afi.cli cycle.
+    from afi.cli._commands import cli as _cli_group
+    from afi.cli._commands import explain as _explain_cmd
+    from afi.cli._commands import learn as _learn_cmd
+
     parser = _AfiArgumentParser(
         prog="afi",
         description="afi — Agent First Interface scaffolder",

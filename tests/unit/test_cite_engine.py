@@ -110,6 +110,54 @@ def test_missing_target_dir_raises_user_error(tmp_path: Path) -> None:
     assert exc.value.code == 1
 
 
+def test_target_that_is_a_file_raises_user_error(tmp_path: Path) -> None:
+    # target exists but is a regular file — caught by the is_dir check after resolve.
+    f = tmp_path / "a-file"
+    f.write_text("x")
+    with pytest.raises(AfiError) as exc:
+        emit_reference(f, lang="python")
+    assert exc.value.code == 1
+    assert "not a directory" in exc.value.message
+
+
+def test_out_outside_target_is_rejected(
+    tmp_path: Path, tmp_path_factory: pytest.TempPathFactory
+) -> None:
+    """--out pointing outside the target must be rejected before rmtree/copytree."""
+    elsewhere = tmp_path_factory.mktemp("elsewhere")
+    with pytest.raises(AfiError) as exc:
+        emit_reference(tmp_path, lang="python", out=elsewhere / "ref")
+    assert exc.value.code == 1
+    assert "must be inside" in exc.value.message
+
+
+def test_out_via_traversal_is_rejected(tmp_path: Path) -> None:
+    """`--out <target>/../sibling` is caught because we resolve first."""
+    sibling = tmp_path.parent / (tmp_path.name + "_sibling")
+    sibling.mkdir(exist_ok=True)
+    traversal = tmp_path / ".." / sibling.name
+    with pytest.raises(AfiError) as exc:
+        emit_reference(tmp_path, lang="python", out=traversal)
+    assert exc.value.code == 1
+    assert "inside" in exc.value.message or "inside" in exc.value.remediation
+
+
+def test_out_equals_target_is_rejected(tmp_path: Path) -> None:
+    with pytest.raises(AfiError) as exc:
+        emit_reference(tmp_path, lang="python", out=tmp_path)
+    assert exc.value.code == 1
+    assert "target path" in exc.value.message
+
+
+def test_out_that_is_an_existing_file_is_rejected(tmp_path: Path) -> None:
+    conflict = tmp_path / "clobber"
+    conflict.write_text("x")  # exists as a FILE inside target
+    with pytest.raises(AfiError) as exc:
+        emit_reference(tmp_path, lang="python", out=conflict)
+    assert exc.value.code == 1
+    assert "not a directory" in exc.value.message
+
+
 def test_supported_langs_contains_python() -> None:
     assert "python" in SUPPORTED_LANGS
 

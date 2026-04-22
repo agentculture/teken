@@ -3,6 +3,10 @@
 The operation is safe by construction:
 
 * writes only under ``out`` (default ``<target>/.afi/reference/<lang>-cli/``);
+* ``out`` is required to resolve to a path strictly inside ``target_path`` —
+  this bounds the :func:`shutil.rmtree`/``copytree`` blast radius to the
+  caller's project, mitigating path-injection (S2083) from a hostile
+  ``--out`` override;
 * adds one line to ``<target>/.gitignore`` only when ``.afi/`` is absent;
 * touches nothing else in the target project;
 * re-running wipes and re-copies ``out`` — always the latest reference.
@@ -52,6 +56,32 @@ class CiteReport:
         }
 
 
+def _validated_out(out: Path, target_path: Path) -> Path:
+    """Resolve ``out`` and verify it sits strictly inside ``target_path``.
+
+    This is the anti-path-injection gate. ``shutil.rmtree`` is destructive; we
+    only accept an ``out`` that resolves to a descendant of the already
+    resolved target directory. ``out == target_path`` is also rejected (would
+    wipe the whole project). Symlinks are followed before comparison.
+    """
+    resolved = out.resolve()
+    if resolved == target_path:
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message="--out cannot equal the target path (would wipe the project)",
+            remediation="pass a subpath inside the target, e.g. --out ./reference/",
+        )
+    try:
+        resolved.relative_to(target_path)
+    except ValueError as err:
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message=f"--out must be inside the target path: {resolved} is not under {target_path}",
+            remediation="pick a path inside the target project, or omit --out for the default",
+        ) from err
+    return resolved
+
+
 def emit_reference(
     target_path: Path,
     *,
@@ -65,16 +95,32 @@ def emit_reference(
             message=f"unsupported lang: {lang}",
             remediation=f"supported langs: {', '.join(SUPPORTED_LANGS)}",
         )
-    target_path = target_path.resolve()
-    if not target_path.is_dir():
+    try:
+        target_path = target_path.resolve(strict=True)
+    except FileNotFoundError as err:
         raise AfiError(
             code=EXIT_USER_ERROR,
             message=f"target path does not exist: {target_path}",
+            remediation="pass a path to an existing directory, or '.' for cwd",
+        ) from err
+    if not target_path.is_dir():
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message=f"target path is not a directory: {target_path}",
             remediation="pass a path to an existing directory, or '.' for cwd",
         )
 
     if out is None:
         out = target_path / ".afi" / "reference" / f"{lang}-cli"
+    # Canonicalise + validate: out must resolve inside target_path. Bounds the
+    # blast radius of the `shutil.rmtree(out)` call below (CWE-22 / S2083).
+    out = _validated_out(out, target_path)
+    if out.exists() and not out.is_dir():
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message=f"--out exists but is not a directory: {out}",
+            remediation="remove that file or pick a different --out",
+        )
 
     src = _REFERENCES_DIR / f"{lang}-cli"
     if not src.is_dir():
@@ -85,11 +131,13 @@ def emit_reference(
         )
 
     if out.exists():
-        shutil.rmtree(out)
+        shutil.rmtree(out)  # out has been validated to live inside target_path
     out.parent.mkdir(parents=True, exist_ok=True)
     shutil.copytree(src, out)
 
     written = sum(1 for p in out.rglob("*") if p.is_file())
+    # ``target_path / ".gitignore"`` is a pure concatenation onto the already
+    # canonicalised target — no user-controlled traversal component.
     gitignore_updated = _ensure_gitignore_line(target_path / ".gitignore")
 
     return CiteReport(out=out, written_count=written, gitignore_updated=gitignore_updated)

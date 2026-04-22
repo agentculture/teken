@@ -1,6 +1,6 @@
 [project]
 name = "afi-cli"
-version = "0.1.2"
+version = "0.2.0"
 description = "Agent First Interface — scaffold CLI, MCP, and HTTP interfaces for agent-first tools."
 readme = "README.md"
 license = "MIT"
@@ -50,7 +50,7 @@ source = ["afi"]
 omit = ["afi/__pycache__/*"]
 
 [tool.coverage.report]
-fail_under = 50
+fail_under = 70
 show_missing = true
 exclude_lines = [
     "pragma: no cover",
@@ -62,10 +62,16 @@ exclude_lines = [
 profile = "black"
 line_length = 100
 known_first_party = ["afi"]
+extend_skip_glob = ["afi/cite/references/**"]
 
 [tool.black]
 line-length = 100
 target-version = ["py312"]
+extend-exclude = '''
+/(
+    afi/cite/references
+)/
+'''
 
 [tool.bandit]
 exclude_dirs = ["tests"]

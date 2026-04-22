@@ -64,9 +64,7 @@ def _as_json_payload() -> dict[str, object]:
     return {
         "tool": "afi",
         "version": __version__,
-        "purpose": (
-            "Generate and verify agent-first interfaces for CLIs " "(and later MCP + HTTP)."
-        ),
+        "purpose": ("Generate and verify agent-first interfaces for CLIs (and later MCP + HTTP)."),
         "commands": [
             {"path": ["learn"], "summary": "Self-teaching prompt."},
             {"path": ["explain"], "summary": "Markdown docs by noun/verb path."},

@@ -16,6 +16,9 @@ class FakeRunner:
     calls: list[tuple[str, ...]] = field(default_factory=list)
 
     def run(self, args: list[str], *, timeout: float = 10.0) -> RunOutput:
+        # `timeout` is part of the Runner protocol; the fake doesn't run
+        # subprocesses, so the value is intentionally discarded.
+        del timeout
         key = tuple(args)
         self.calls.append(key)
         return self.responses.get(key, self.default)

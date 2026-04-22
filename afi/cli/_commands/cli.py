@@ -41,13 +41,22 @@ def _resolve_tool_name(target_path: Path) -> str:
             code=EXIT_USER_ERROR,
             message=f"no [project.scripts] in {pp}",
             remediation=(
-                "add a [project.scripts] entry to pyproject.toml so the tool has " "an entry point"
+                "add a [project.scripts] entry to pyproject.toml so the tool has an entry point"
             ),
         )
     return next(iter(scripts.keys()))
 
 
-def cmd_cite(args: argparse.Namespace) -> int:
+def cmd_cite(args: argparse.Namespace) -> None:
+    """Handler for ``afi cli cite``.
+
+    Returns ``None`` on success (treated as ``EXIT_SUCCESS`` by
+    :func:`afi.cli._dispatch`); every failure path raises
+    :class:`AfiError`. This keeps the handler protocol simple: "raise on
+    failure, return an int only when the success exit code varies" — the
+    way :func:`cmd_verify` does, and the way future verbs that need
+    nuanced exit codes (e.g. rubric fail) will.
+    """
     target_path = Path(args.path).resolve()
     lang = args.lang
     out = Path(args.out).resolve() if args.out else None
@@ -55,7 +64,7 @@ def cmd_cite(args: argparse.Namespace) -> int:
     json_mode = bool(getattr(args, "json", False))
     if json_mode:
         emit_result(report.to_dict(), json_mode=True)
-        return 0
+        return
 
     # The cite report IS the command's result — must go to stdout to honour
     # the stdout/stderr split (results → stdout). `emit_diagnostic` is
@@ -80,7 +89,6 @@ def cmd_cite(args: argparse.Namespace) -> int:
         ]
     )
     emit_result("\n".join(lines), json_mode=False)
-    return 0
 
 
 def cmd_verify(args: argparse.Namespace) -> int:

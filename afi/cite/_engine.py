@@ -136,19 +136,34 @@ def emit_reference(
     shutil.copytree(src, out)
 
     written = sum(1 for p in out.rglob("*") if p.is_file())
-    # ``target_path / ".gitignore"`` is a pure concatenation onto the already
-    # canonicalised target — no user-controlled traversal component.
-    gitignore_updated = _ensure_gitignore_line(target_path / ".gitignore")
+    gitignore_updated = _ensure_gitignore_line(target_path)
 
     return CiteReport(out=out, written_count=written, gitignore_updated=gitignore_updated)
 
 
-def _ensure_gitignore_line(gitignore: Path) -> bool:
-    """Ensure ``GITIGNORE_ENTRY`` is present in ``gitignore``.
+def _ensure_gitignore_line(project_root: Path) -> bool:
+    """Ensure ``GITIGNORE_ENTRY`` is present in ``<project_root>/.gitignore``.
+
+    Security (S2083 defence in depth): ``project_root`` must be an already
+    resolved, absolute directory. The callee *validates* that precondition
+    before touching the filesystem, then constructs the path using a literal
+    filename (``.gitignore``) — no user-controlled traversal component can
+    escape ``project_root``.
 
     Returns ``True`` if the file was created or appended; ``False`` if the
     line (or an equivalent glob) was already present.
     """
+    if not project_root.is_absolute() or not project_root.is_dir():
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message=f"project_root is not a resolved directory: {project_root}",
+            remediation="pass an existing directory; '.' is resolved internally",
+        )
+    # Literal filename — the only path component we concatenate onto the
+    # pre-validated project_root. S2083 sanitiser pattern: validated root +
+    # static leaf = bounded write target.
+    gitignore = project_root / ".gitignore"
+
     line = GITIGNORE_ENTRY
     equivalents = {line, line.rstrip("/"), line + "**", line.rstrip("/") + "/**"}
     if gitignore.is_file():

@@ -94,8 +94,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     # Noun groups.
     _cli_group.register(sub)
-    # _mcp_group.register(sub)   # v0.4
-    # _site_group.register(sub)  # v0.5
+    # Future noun groups (mcp, site) will register here in v0.4 / v0.5.
 
     return parser
 
@@ -103,12 +102,14 @@ def _build_parser() -> argparse.ArgumentParser:
 def _dispatch(args: argparse.Namespace) -> int:
     """Invoke the registered handler and translate exceptions to exit codes.
 
-    Extracted from ``main()`` so unit tests can exercise the error-handling
-    path without going through argparse.
+    Handler protocol: a handler may return ``None`` (treated as success,
+    exit 0) or an ``int`` (used directly as the exit code). Failures MUST
+    raise :class:`AfiError`; any other exception is wrapped into one so no
+    Python traceback leaks.
     """
     json_mode = bool(getattr(args, "json", False))
     try:
-        return args.func(args)
+        rc = args.func(args)
     except AfiError as err:
         emit_error(err, json_mode=json_mode)
         return err.code
@@ -120,6 +121,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         )
         emit_error(wrapped, json_mode=json_mode)
         return wrapped.code
+    return rc if rc is not None else 0
 
 
 def main(argv: list[str] | None = None) -> int:

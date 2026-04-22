@@ -1,8 +1,12 @@
 """End-to-end tests for the ``afi cli {cite,verify}`` surface.
 
-These drive afi as a subprocess (not via :func:`main`) to catch packaging
-issues — the reference tree must be present in the installed distribution,
-not just on disk under the source tree.
+These drive afi as a subprocess (via ``python -m afi``) to exercise the full
+argparse + dispatch + cite + rubric code path end-to-end — not via
+:func:`afi.cli.main`. They do NOT test the built wheel's packaging: the
+subprocess imports from the source tree directly. Packaging-specific
+coverage (that the reference tree ships in the wheel with `{{slug}}/`
+directories intact) is done at release time via ``uv build`` and a manual
+wheel-contents check, not here.
 """
 
 from __future__ import annotations

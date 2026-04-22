@@ -34,7 +34,17 @@ def _check_project_scripts(ctx: VerifyContext) -> CheckResult:
             "no pyproject.toml",
             remediation="create pyproject.toml first",
         )
-    data = tomllib.loads(p.read_text())
+    try:
+        data = tomllib.loads(p.read_text())
+    except tomllib.TOMLDecodeError as err:
+        return CheckResult(
+            BUNDLE,
+            "project_scripts",
+            False,
+            "error",
+            f"invalid TOML in {p}: {err}",
+            remediation="fix the TOML syntax error in pyproject.toml",
+        )
     scripts = data.get("project", {}).get("scripts", {})
     if scripts:
         return CheckResult(

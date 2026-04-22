@@ -10,15 +10,21 @@ BUNDLE = "json"
 
 
 def _check_learn_json_parseable(ctx: VerifyContext) -> CheckResult:
+    """Single stable check id regardless of how the failure manifests.
+
+    Failure modes (all reported under ``learn_json_parseable``):
+      - non-zero exit → evidence names the exit code.
+      - zero exit but stdout isn't valid JSON → evidence names the decode error.
+    """
     out = ctx.runner.run(["learn", "--json"], timeout=5.0)
     if out.returncode != 0:
         return CheckResult(
             BUNDLE,
-            "learn_json_exit_zero",
+            "learn_json_parseable",
             False,
             "error",
-            f"exit={out.returncode}",
-            remediation="add `--json` flag to the `learn` command",
+            f"`learn --json` exited with {out.returncode} (expected 0)",
+            remediation="add a `--json` flag to the `learn` command",
         )
     try:
         json.loads(out.stdout)
@@ -29,7 +35,7 @@ def _check_learn_json_parseable(ctx: VerifyContext) -> CheckResult:
             False,
             "error",
             f"stdout is not valid JSON: {err}",
-            remediation="make `learn --json` emit a parseable JSON object",
+            remediation="make `learn --json` emit a parseable JSON object on stdout",
         )
     return CheckResult(
         BUNDLE, "learn_json_parseable", True, "info", f"{len(out.stdout)} chars JSON"
@@ -53,15 +59,16 @@ def _check_stderr_clean_on_success(ctx: VerifyContext) -> CheckResult:
 
 
 def _check_explain_json_parseable(ctx: VerifyContext) -> CheckResult:
+    """Single stable check id for the explain-JSON check (parallel to learn)."""
     out = ctx.runner.run(["explain", "--json"], timeout=5.0)
     if out.returncode != 0:
         return CheckResult(
             BUNDLE,
-            "explain_json_exit_zero",
+            "explain_json_parseable",
             False,
             "warn",
-            f"exit={out.returncode}",
-            remediation="add `--json` flag to the `explain` command",
+            f"`explain --json` exited with {out.returncode} (expected 0)",
+            remediation="add a `--json` flag to the `explain` command",
         )
     try:
         json.loads(out.stdout)
@@ -72,7 +79,7 @@ def _check_explain_json_parseable(ctx: VerifyContext) -> CheckResult:
             False,
             "warn",
             f"stdout is not valid JSON: {err}",
-            remediation="make `explain --json` emit a parseable JSON object",
+            remediation="make `explain --json` emit a parseable JSON object on stdout",
         )
     return CheckResult(
         BUNDLE, "explain_json_parseable", True, "info", f"{len(out.stdout)} chars JSON"

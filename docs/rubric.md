@@ -29,7 +29,7 @@ Five bundles. Every bundle contains a small set of mechanical checks. A CLI that
 
 - `<tool> learn` exits `0`.
 - `stdout` is ≥ 200 characters.
-- Output mentions: **purpose**, **commands/verbs**, **exit** codes, `--json`, **explain**.
+- Output mentions: **purpose**, **commands**, **exit** codes, `--json`, **explain** (case-insensitive substring match).
 
 **Why:** `--help` is terse and fragmented across subparsers. `learn` is a single, structured prompt an agent can read in one shot to author its own usage skill. The 200-character floor and marker list guarantee the prompt says something useful.
 

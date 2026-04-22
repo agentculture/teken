@@ -6,7 +6,7 @@ from afi.rubric._types import CheckResult, VerifyContext
 
 BUNDLE = "learnability"
 MIN_LEN = 200
-REQUIRED_MARKERS = ("purpose", "exit", "--json", "explain")
+REQUIRED_MARKERS = ("purpose", "commands", "exit", "--json", "explain")
 
 
 def _check_learn_exit_zero(ctx: VerifyContext) -> CheckResult:

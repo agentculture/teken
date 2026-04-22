@@ -60,23 +60,38 @@ def _check_no_traceback(ctx: VerifyContext) -> CheckResult:
 
 
 def _check_exit_codes_documented(ctx: VerifyContext) -> CheckResult:
+    """Require learn output to document the full exit-code policy.
+
+    We require the word "exit" AND all three codes 0, 1, 2 to appear in
+    stdout. Matching any single digit was too loose — a tool could pass just
+    by having "hello 1 world" anywhere in `learn` output.
+    """
     out = ctx.runner.run(["learn"], timeout=5.0)
-    text = out.stdout.lower()
-    if "exit" in text and any(code in out.stdout for code in ("0", "1", "2")):
+    text = out.stdout
+    text_lower = text.lower()
+    required_codes = ("0", "1", "2")
+    missing_codes = [c for c in required_codes if c not in text]
+    has_exit_word = "exit" in text_lower
+    if has_exit_word and not missing_codes:
         return CheckResult(
             BUNDLE,
             "exit_codes_documented",
             True,
             "info",
-            "exit-code mention found in learn output",
+            "learn output mentions 'exit' and codes 0/1/2",
         )
+    details = []
+    if not has_exit_word:
+        details.append("word 'exit' absent from learn output")
+    if missing_codes:
+        details.append(f"codes missing: {', '.join(missing_codes)}")
     return CheckResult(
         BUNDLE,
         "exit_codes_documented",
         False,
         "warn",
-        "no exit-code policy in learn output",
-        remediation="document exit codes (0/1/2) in `learn` output",
+        "; ".join(details) or "exit-code policy not documented",
+        remediation="document the exit-code policy (0 success / 1 user / 2 env) in `learn` output",
     )
 
 

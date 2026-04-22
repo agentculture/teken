@@ -27,7 +27,14 @@ def _resolve_tool_name(target_path: Path) -> str:
             message=f"no pyproject.toml at {pp}",
             remediation="run verify from the root of a Python project with pyproject.toml",
         )
-    data = tomllib.loads(pp.read_text())
+    try:
+        data = tomllib.loads(pp.read_text())
+    except tomllib.TOMLDecodeError as err:
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message=f"invalid TOML in {pp}: {err}",
+            remediation="fix the TOML syntax error in pyproject.toml",
+        ) from err
     scripts = data.get("project", {}).get("scripts", {})
     if not scripts:
         raise AfiError(
@@ -50,18 +57,29 @@ def cmd_cite(args: argparse.Namespace) -> int:
         emit_result(report.to_dict(), json_mode=True)
         return 0
 
-    emit_diagnostic(f"Wrote {report.written_count} files to {report.out}")
-    if report.gitignore_updated:
-        emit_diagnostic("Added `.afi/` to .gitignore")
-    else:
-        emit_diagnostic(".gitignore already ignores `.afi/`")
-    emit_diagnostic("")
-    emit_diagnostic("Next steps:")
+    # The cite report IS the command's result — must go to stdout to honour
+    # the stdout/stderr split (results → stdout). `emit_diagnostic` is
+    # reserved for optional progress/side info and is unused in this path.
+    lines = [
+        f"Wrote {report.written_count} files to {report.out}",
+        (
+            "Added `.afi/` to .gitignore"
+            if report.gitignore_updated
+            else ".gitignore already ignores `.afi/`"
+        ),
+        "",
+        "Next steps:",
+    ]
     for i, step in enumerate(report.describe_next_steps(), start=1):
-        emit_diagnostic(f"  {i}. {step}")
-    emit_diagnostic("")
-    emit_diagnostic("For details on any step:  afi explain cli cite")
-    emit_diagnostic("For the rubric itself:    afi explain cli verify")
+        lines.append(f"  {i}. {step}")
+    lines.extend(
+        [
+            "",
+            "For details on any step:  afi explain cli cite",
+            "For the rubric itself:    afi explain cli verify",
+        ]
+    )
+    emit_result("\n".join(lines), json_mode=False)
     return 0
 
 

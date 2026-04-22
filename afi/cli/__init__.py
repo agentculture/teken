@@ -25,8 +25,28 @@ from afi.cli._errors import EXIT_USER_ERROR, AfiError
 from afi.cli._output import emit_error
 
 
+class _AfiArgumentParser(argparse.ArgumentParser):
+    """ArgumentParser that routes errors through :func:`emit_error`.
+
+    Argparse's default error handler writes ``prog: error: <msg>`` to stderr
+    and exits with code 2. That skips our AfiError plumbing and — crucially —
+    produces no ``hint:`` line, which would make afi itself fail the rubric's
+    error-propagation bundle. This subclass emits our structured error format
+    instead and exits with :attr:`EXIT_USER_ERROR`.
+    """
+
+    def error(self, message: str) -> None:  # type: ignore[override]
+        err = AfiError(
+            code=EXIT_USER_ERROR,
+            message=message,
+            remediation=f"run '{self.prog} --help' to see valid arguments",
+        )
+        emit_error(err, json_mode=False)
+        raise SystemExit(err.code)
+
+
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = _AfiArgumentParser(
         prog="afi",
         description="afi — Agent First Interface scaffolder",
     )

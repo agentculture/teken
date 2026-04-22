@@ -19,6 +19,7 @@ import argparse
 import sys
 
 from afi import __version__
+from afi.cli._commands import cli as _cli_group
 from afi.cli._commands import explain as _explain_cmd
 from afi.cli._commands import learn as _learn_cmd
 from afi.cli._errors import EXIT_USER_ERROR, AfiError
@@ -61,10 +62,10 @@ def _build_parser() -> argparse.ArgumentParser:
     _learn_cmd.register(sub)
     _explain_cmd.register(sub)
 
-    # Noun groups slot in here in later commits:
-    #   _cli_group.register(sub)
-    #   _mcp_group.register(sub)
-    #   _site_group.register(sub)
+    # Noun groups.
+    _cli_group.register(sub)
+    # _mcp_group.register(sub)   # v0.4
+    # _site_group.register(sub)  # v0.5
 
     return parser
 

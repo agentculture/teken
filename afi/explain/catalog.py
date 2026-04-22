@@ -96,10 +96,109 @@ entry `("cli", "cite")`. Unknown paths exit `1` with a `hint:` pointing at
 resolve, and bad paths must exit non-zero with remediation.
 """
 
+_CLI = """\
+# afi cli
+
+The `cli` noun groups verbs that act on *a CLI project* (the target
+project). In v0.2 there are two verbs:
+
+- `afi cli cite [path]` — drop the Python agent-first reference tree into
+  `<path>/.afi/reference/python-cli/` for an agent to integrate.
+- `afi cli verify [path]` — run the five-bundle agent-first rubric against
+  the CLI at `<path>`.
+
+See `afi explain cli cite` and `afi explain cli verify` for details.
+"""
+
+_CLI_CITE = """\
+# afi cli cite [path] [--lang LANG] [--out DIR] [--json]
+
+Emit the agent-first CLI reference tree into the target project.
+
+## What it does
+
+1. Copies the reference tree (bundled with afi-cli under
+   `afi/cite/references/<lang>-cli/`) to `<path>/.afi/reference/<lang>-cli/`
+   wholesale. Tokens `{{project_name}}`, `{{slug}}`, `{{module}}` are left
+   **literal** — the agent consuming the reference substitutes them.
+2. Adds `.afi/` to `<path>/.gitignore` if missing. Never modifies
+   `.gitignore` otherwise.
+3. Never touches anything outside `<path>/.afi/` and the single gitignore
+   line.
+
+Re-running wipes and re-writes `<path>/.afi/reference/<lang>-cli/` —
+always the latest reference. The `.gitignore` line is check-before-modify.
+
+## Arguments
+
+- `path` (optional, default `.`) — target project directory.
+- `--lang` — reference language. v0.2 supports `python`.
+- `--out DIR` — override the output directory (default:
+  `<path>/.afi/reference/<lang>-cli/`).
+- `--json` — emit the report as a JSON object instead of text.
+
+## Output contains
+
+- Count of files written and their root directory.
+- Whether `.gitignore` was updated.
+- A three-step `next_steps` list: read AGENT.md, apply the pattern,
+  run `afi cli verify .`.
+- Pointers to `afi explain cli cite` and `afi explain cli verify` for
+  more detail.
+
+## Exit codes
+
+- `0` success
+- `1` user error (bad lang, missing target, bad `--out`)
+- `2` environment error (reference tree missing in install)
+"""
+
+_CLI_VERIFY = """\
+# afi cli verify [path] [--json] [--strict]
+
+Audit a CLI at `path` against the five-bundle agent-first rubric.
+
+## Bundles
+
+1. **structure** — `pyproject.toml` with `[project.scripts]`, `tests/`
+   dir, `<tool> --help` exits 0.
+2. **learnability** — `<tool> learn` exits 0, stdout ≥ 200 chars, mentions
+   purpose, commands, exit codes, `--json`, `explain`.
+3. **json** — `<tool> learn --json` is parseable; stderr clean on success;
+   `<tool> explain --json` works.
+4. **errors** — bogus verb exits non-zero with a `hint:` line, no Python
+   traceback; exit-code policy documented in `learn`.
+5. **explain** — `<tool> explain` and `<tool> explain <tool>` succeed;
+   bogus path fails with remediation.
+
+## Strategy
+
+Hybrid: static file checks (pyproject, tests/) + black-box subprocess
+probes for every behavioral check. `<tool>` is resolved from
+`[project.scripts]`; if not on PATH, falls back to `uv run --project
+<path>`.
+
+## Arguments
+
+- `path` (optional, default `.`) — target project directory.
+- `--json` — emit the full report as JSON (`results` + `summary`).
+- `--strict` — treat warnings as failures.
+
+## Exit codes
+
+- `0` if no `error`-severity check failed (strict: no failure at all).
+- `1` if the rubric failed.
+- `2` if verify itself couldn't set up (can't find the tool, no
+  pyproject, etc.).
+"""
+
 
 ENTRIES: dict[tuple[str, ...], str] = {
     (): _ROOT,
     ("afi",): _ROOT,
     ("learn",): _LEARN,
     ("explain",): _EXPLAIN,
+    ("cli",): _CLI,
+    ("cli", "cite"): _CLI_CITE,
+    ("cli", "verify"): _CLI_VERIFY,
 }

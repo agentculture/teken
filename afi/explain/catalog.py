@@ -14,14 +14,24 @@ _ROOT = """\
 
 afi is the AgentCulture Agent First Interface scaffolder. It emits reference
 drops for agent-first CLIs (and, later, MCP servers and HTTP sites) and
-audits any tool against the five-bundle agent-first rubric.
+audits any tool against the six-bundle agent-first rubric.
 
 ## Verbs
 
 - `afi learn` — structured self-teaching prompt.
 - `afi explain <path>` — markdown docs for any noun/verb.
+- `afi overview [path]` — descriptive rollup across all interface surfaces.
 - `afi cli cite [path]` — drop the CLI reference pattern into a project.
 - `afi cli verify [path]` — audit a CLI against the rubric.
+- `afi cli overview [path]` — read-only snapshot of a target CLI.
+
+## Universal verb triple (agent-first)
+
+Every agent-first CLI exposes `learn` / `explain` / `overview`:
+
+- `learn` — what is this tool?
+- `explain <path>` — what does this command do?
+- `overview [path]` — what is *present* in the subject the command addresses?
 
 ## Principles
 
@@ -41,8 +51,10 @@ sibling project `agex-cli`.
 
 - `afi explain learn`
 - `afi explain explain`
+- `afi explain overview`
 - `afi explain cli cite`
 - `afi explain cli verify`
+- `afi explain cli overview`
 """
 
 _LEARN = """\
@@ -100,14 +112,17 @@ _CLI = """\
 # afi cli
 
 The `cli` noun groups verbs that act on *a CLI project* (the target
-project). In v0.2 there are two verbs:
+project). From v0.3 there are three verbs:
 
 - `afi cli cite [path]` — drop the Python agent-first reference tree into
   `<path>/.afi/reference/python-cli/` for an agent to integrate.
-- `afi cli verify [path]` — run the five-bundle agent-first rubric against
+- `afi cli verify [path]` — run the six-bundle agent-first rubric against
   the CLI at `<path>`.
+- `afi cli overview [path]` — read-only descriptive snapshot of the CLI at
+  `<path>` (or afi's own scaffolded template when no path is given).
 
-See `afi explain cli cite` and `afi explain cli verify` for details.
+See `afi explain cli cite`, `afi explain cli verify`, and
+`afi explain cli overview` for details.
 """
 
 _CLI_CITE = """\
@@ -193,12 +208,81 @@ probes for every behavioral check. `<tool>` is resolved from
 """
 
 
+_OVERVIEW = """\
+# afi overview [path]
+
+Emits a **read-only descriptive snapshot** of the interface surfaces
+present in the target project. Descriptive, not diagnostic — see
+`afi cli verify` for rubric grading.
+
+## Universal verb triple
+
+`overview` is the third verb of the agent-first universal triple
+(`learn`, `explain`, `overview`). Other culture-embedded CLIs follow the
+same pattern:
+
+- `agex overview --agent <backend>` — agex config for a backend.
+- `culture mesh overview` / `culture agent overview` — subject-of-noun.
+- `afi cli overview [path]` / `afi overview [path]` — afi's two entry
+  points.
+
+## What it reports
+
+- **afi overview [path]** — rollup across all afi surfaces. In v0.3 only
+  the `cli` surface is implemented; `mcp` (v0.4) and `site` (v0.5) follow.
+  Currently delegates to the `cli` inspector and appends a `> note:`
+  about unimplemented surfaces.
+- **afi cli overview [path]** — deep on the CLI subject: project root,
+  command surface (detected nouns/verbs), agent-first triple presence,
+  rubric posture, notes for agents.
+
+## Zero-target default
+
+If `path` is omitted, or the target has no detectable CLI surface, afi
+describes **its own scaffolded reference template** (the tree under
+`afi/cite/references/python-cli/`). afi knows its own creations
+perfectly, so this fallback is complete and deterministic.
+
+## Usage
+
+    afi overview
+    afi overview .
+    afi cli overview .
+    afi cli overview /path/to/project
+    afi cli overview --json .
+
+## JSON shape
+
+    {
+      "subject": str,
+      "path": str | null,
+      "sections": [{"heading": str, "body_md": str, "findings": [...]}],
+      "warnings": [str, ...],
+      "notes": [str, ...]
+    }
+
+Stable keys — culture's embed helper can machine-read the output.
+
+## Rubric role
+
+Rubric bundle 6 (`overview_cmd`) asserts that every agent-first CLI
+exposes:
+
+- a top-level `overview` verb that works and accepts `--json`;
+- an `overview` verb under every noun that has action-verbs;
+- a stable JSON shape (`subject`, `sections` required);
+- **read-only** behaviour (the target tree's file mtimes must not change).
+"""
+
+
 ENTRIES: dict[tuple[str, ...], str] = {
     (): _ROOT,
     ("afi",): _ROOT,
     ("learn",): _LEARN,
     ("explain",): _EXPLAIN,
+    ("overview",): _OVERVIEW,
     ("cli",): _CLI,
     ("cli", "cite"): _CLI_CITE,
     ("cli", "verify"): _CLI_VERIFY,
+    ("cli", "overview"): _OVERVIEW,
 }

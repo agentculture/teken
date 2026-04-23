@@ -1,8 +1,9 @@
-"""The ``cli`` noun group — verbs ``cite`` and ``verify``.
+"""The ``cli`` noun group — verbs ``cite``, ``verify``, and ``overview``.
 
-``afi cli cite``  — drop the agent-first CLI reference tree into the target
-                    project under ``.afi/reference/<lang>-cli/``.
-``afi cli verify`` — run the five-bundle rubric against a target CLI.
+``afi cli cite``     — drop the agent-first CLI reference tree into the target
+                       project under ``.afi/reference/<lang>-cli/``.
+``afi cli verify``   — run the six-bundle rubric against a target CLI.
+``afi cli overview`` — read-only descriptive snapshot of a target CLI.
 """
 
 from __future__ import annotations
@@ -14,6 +15,8 @@ from pathlib import Path
 from afi.cite import SUPPORTED_LANGS, emit_reference
 from afi.cli._errors import EXIT_USER_ERROR, AfiError
 from afi.cli._output import emit_diagnostic, emit_result
+from afi.overview import build as build_overview
+from afi.overview import to_json_dict, to_markdown
 from afi.rubric import run_rubric
 from afi.rubric._runner import SubprocessRunner
 from afi.rubric._types import CheckResult, VerifyContext
@@ -120,6 +123,24 @@ def cmd_verify(args: argparse.Namespace) -> int:
     return 0 if summary["errors"] == 0 else 1
 
 
+def cmd_cli_overview(args: argparse.Namespace) -> int:
+    """Handler for ``afi cli overview [path]``.
+
+    Read-only descriptive snapshot. If ``path`` is missing or points at a
+    project without a detectable CLI surface, emits the overview of afi's
+    own scaffolded template (the "zero-target default").
+    """
+    raw = getattr(args, "path", None)
+    path: Path | None = Path(raw).resolve() if raw else None
+    report = build_overview("cli", path)
+    json_mode = bool(getattr(args, "json", False))
+    if json_mode:
+        emit_result(to_json_dict(report), json_mode=True)
+    else:
+        emit_result(to_markdown(report), json_mode=False)
+    return 0
+
+
 def _summarize(results: list[CheckResult]) -> dict[str, object]:
     passed = sum(1 for r in results if r.passed)
     failed = sum(1 for r in results if not r.passed)
@@ -195,6 +216,22 @@ def register(sub: argparse._SubParsersAction) -> None:
         help="Treat warnings as failures (non-zero exit on any not-passed check).",
     )
     verify.set_defaults(func=cmd_verify)
+
+    overview = cli_sub.add_parser(
+        "overview",
+        help="Read-only descriptive snapshot of the CLI at <path> (defaults: afi template).",
+    )
+    overview.add_argument(
+        "path",
+        nargs="?",
+        default=None,
+        help=(
+            "Target project path. If omitted (or the target has no CLI surface), "
+            "describe afi's default scaffolded template."
+        ),
+    )
+    overview.add_argument("--json", action="store_true", help="Emit structured JSON.")
+    overview.set_defaults(func=cmd_cli_overview)
 
     def _no_verb(_args: argparse.Namespace) -> int:
         cli_parser.print_help()

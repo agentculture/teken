@@ -5,8 +5,18 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/). This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0] - 2026-04-23
+## [0.4.0] - 2026-04-23
 
+### Added
+
+- docs/_config.yml, docs/Gemfile, docs/index.md, docs/.gitignore — Jekyll site scaffold modeled on agex-cli with just-the-docs theme, baseurl /afi, and jekyll-sitemap plugin so /afi/sitemap.xml is auto-generated on build.
+- .github/workflows/docs.yml — PR preview + main deploy pipeline to Cloudflare Pages project afi (Direct Upload via wrangler). Deploy step is gated on CLOUDFLARE_API_TOKEN presence so CI stays green until secrets land via agentculture/cloudflare.
+
+### Changed
+
+- docs/ layout now follows the agex-cli pattern: existing agentculture.md, agent-first.md, and rubric.md render under <https://culture.dev/afi/> without content edits.
+
+## [0.3.0] - 2026-04-23
 
 ### Added
 

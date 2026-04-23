@@ -1,0 +1,154 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write  # for posting the preview URL comment on PRs
+
+jobs:
+  build-and-deploy:
+    # Pull requests from forks cannot see the Cloudflare secrets (GitHub
+    # masks them for security), so the deploy step would fail. Skip the
+    # whole job for fork PRs and rely on local `bundle exec jekyll serve`
+    # for review. Same-repo PRs hit the fast path.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+
+      # Jekyll build.
+      - uses: ruby/setup-ruby@7372622e62b60b3cb750dcd2b9e32c247ffec26a  # v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+          working-directory: docs
+      - run: bundle exec jekyll build
+        working-directory: docs
+
+      # Compute the Cloudflare Pages branch name from the PR's head ref.
+      # CF Pages uses the branch name as a subdomain component, so only
+      # `[a-zA-Z0-9-]` are safe. Replace unsafe chars with `-`, collapse
+      # consecutive dashes, strip leading/trailing dashes, and fall back
+      # to `pr-<number>` when sanitising produces an empty string.
+      - name: Compute preview branch
+        id: branch
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          safe=$(printf '%s' "$HEAD_REF" | sed 's/[^a-zA-Z0-9-]/-/g; s/--*/-/g; s/^-//; s/-$//')
+          if [ -z "$safe" ]; then
+            safe="pr-${PR_NUMBER}"
+          fi
+          echo "name=$safe" >> "$GITHUB_OUTPUT"
+
+      # Deploy to Cloudflare Pages.
+      # - push / workflow_dispatch -> `--branch=main` = production
+      # - pull_request              -> `--branch=<sanitised-head-ref>` = preview
+      # The project `afi` is a Direct Upload project (to be created by
+      # agentculture/cloudflare), so CF won't auto-build; this step IS
+      # the build+deploy pipeline. Skipped until the CF secrets land.
+      - name: Check Cloudflare secrets
+        id: secrets
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # wrangler needs BOTH the API token and the account ID. Gating
+          # on only one leaves a failure window where adding just one
+          # secret would turn CI red. List exactly which secrets are
+          # missing so a reviewer doesn't have to open the deploy logs
+          # to find out.
+          missing=""
+          if [ -z "$CF_API_TOKEN" ]; then
+            missing="CLOUDFLARE_API_TOKEN"
+          fi
+          if [ -z "$CF_ACCOUNT_ID" ]; then
+            if [ -n "$missing" ]; then
+              missing="$missing, CLOUDFLARE_ACCOUNT_ID"
+            else
+              missing="CLOUDFLARE_ACCOUNT_ID"
+            fi
+          fi
+          if [ -z "$missing" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Cloudflare secrets not yet configured (missing: $missing); skipping deploy. See agentculture/cloudflare for wiring."
+          fi
+      # Secrets are necessary but not sufficient: the Cloudflare Pages
+      # project `afi` also has to exist (creation is tracked in
+      # agentculture/cloudflare#16). Precheck against the CF API so the
+      # deploy step only runs when there's an actual project to deploy
+      # into — otherwise the workflow stays green and emits a notice
+      # pointing at the tracking issue.
+      - name: Check Cloudflare project exists
+        id: project
+        if: steps.secrets.outputs.present == 'true'
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          status=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/pages/projects/afi")
+          if [ "$status" = "200" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Cloudflare Pages project 'afi' not found (HTTP $status); skipping deploy. See agentculture/cloudflare#16."
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        if: steps.secrets.outputs.present == 'true' && steps.project.outputs.exists == 'true'
+        uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd  # v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy docs/_site --project-name=afi --branch=${{ github.event_name == 'pull_request' && steps.branch.outputs.name || 'main' }}
+
+      # Post the preview URL back on the PR so reviewers can click
+      # through without digging into the workflow logs. Uses a marker
+      # (`<!-- afi-docs-preview -->`) to update the existing comment on
+      # subsequent pushes instead of spamming a new comment per run.
+      - name: Post (or update) preview URL comment
+        if: github.event_name == 'pull_request' && steps.deploy.outputs.deployment-url != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.deployment-url }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          MARKER='<!-- afi-docs-preview -->'
+          # Jekyll builds with `baseurl: /afi`, so every asset, link, and
+          # canonical tag lives under /afi. Root of either preview URL
+          # returns a 404 — point reviewers at /afi/ directly.
+          DEPLOY_ENTRY="${DEPLOY_URL%/}/afi/"
+          ALIAS_URL="https://${BRANCH}.afi.pages.dev/afi/"
+          BODY="$MARKER"$'\n'"📘 **docs preview** for this PR:"$'\n\n'"- **Latest deploy:** $DEPLOY_ENTRY  _(immutable — this specific commit)_"$'\n'"- **Branch alias:** $ALIAS_URL  _(always latest — updates on each push)_"
+          EXISTING=$(gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments" \
+            | jq -rs "add | [.[] | select(.body | contains(\"$MARKER\")) | .id] | first // empty")
+          if [ -n "$EXISTING" ]; then
+            gh api --method PATCH "repos/$REPO/issues/comments/$EXISTING" \
+              -f body="$BODY" > /dev/null
+            echo "Updated existing preview comment #$EXISTING"
+          else
+            gh pr comment "$PR_NUMBER" --body "$BODY"
+            echo "Created new preview comment"
+          fi

@@ -1,0 +1,64 @@
+title: afi-cli
+description: Agent First Interface — scaffold CLI, MCP, and HTTP surfaces for tools whose primary consumer is an AI agent.
+url: https://culture.dev
+baseurl: "/afi"
+lang: en
+
+theme: just-the-docs
+color_scheme: dark
+
+search_enabled: true
+search:
+  button: true
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-relative-links
+  - jekyll-sitemap
+  - jekyll-redirect-from
+
+relative_links:
+  enabled: true
+  collections: false
+
+markdown: kramdown
+permalink: pretty
+
+social:
+  name: afi-cli
+  links:
+    - https://github.com/agentculture/afi-cli
+
+author:
+  name: AgentCulture
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: "default"
+
+aux_links:
+  "Culture":
+    - "https://culture.dev"
+  "agex":
+    - "https://culture.dev/agex"
+  "GitHub":
+    - "https://github.com/agentculture/afi-cli"
+  "PyPI":
+    - "https://pypi.org/project/afi-cli/"
+
+aux_links_new_tab: false
+
+footer_content: >-
+  afi-cli — the Agent First Interface scaffolder for the
+  <a href="https://culture.dev">Culture</a> ecosystem.
+  Source on <a href="https://github.com/agentculture/afi-cli">GitHub</a>.
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - .jekyll-cache
+  - .jekyll-metadata
+  - _site

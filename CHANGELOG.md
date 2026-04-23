@@ -15,7 +15,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - docs/_config.yml: color_scheme dark -> dark-terminal so the new SCSS activates.
-- docs/index.md: restructured the landing page to use the shared hero + btn-cta + docs-grid components. Visual parity with culture.dev/agex; copy is unchanged.
+- docs/index.md: restructured the landing page to use the shared hero + btn-cta + docs-grid components. Visual parity with culture.dev/agex; hero and card copy were rewritten to match the new layout.
 
 ## [0.4.0] - 2026-04-23
 

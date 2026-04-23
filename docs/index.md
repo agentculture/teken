@@ -6,9 +6,10 @@ description: Agent First Interface — scaffold CLI, MCP, and HTTP surfaces for 
 ---
 
 <!-- markdownlint-disable MD033 -->
-<!-- Landing page uses the shared culture design-system components (hero,
-     btn-cta, docs-grid). Those require inline HTML because Jekyll
-     markdown doesn't know about the CSS classes. Scoped disable. -->
+<!-- The landing page is all hero / btn-cta / docs-grid components from
+     the shared culture design system — Jekyll markdown can't reach
+     those CSS classes, so inline HTML is load-bearing. MD033 stays
+     disabled for the rest of this file; no re-enable. -->
 
 <div class="hero">
   <p class="hero-label">Agent First Interface</p>
@@ -44,9 +45,11 @@ afi learn                    # structured self-teaching prompt for an agent
   </a>
   <a class="docs-card" href="{{ '/agent-first/#http--discoverability' | relative_url }}">
     <h3>HTTP — discoverability</h3>
-    <p class="text-muted">Markdown pages plus <a href="{{ '/sitemap.xml' | relative_url }}">sitemap.xml</a>. Any agent with a fetch tool can navigate.</p>
+    <p class="text-muted">Markdown pages plus a sitemap. Any agent with a fetch tool can navigate.</p>
   </a>
 </div>
+
+<p class="text-muted" style="margin-top:0.75rem">This site ships a <a href="{{ '/sitemap.xml' | relative_url }}">sitemap.xml</a> — that's the HTTP principle applied to afi-cli itself.</p>
 
 ## Read next
 
@@ -61,7 +64,7 @@ afi learn                    # structured self-teaching prompt for an agent
   </a>
   <a class="docs-card" href="{{ '/rubric/' | relative_url }}">
     <h3>The Rubric</h3>
-    <p class="text-muted">Six mechanical bundles <code>afi cli verify</code> runs against any CLI. afi-cli itself has to pass.</p>
+    <p class="text-muted">The mechanical bundles <code>afi cli verify</code> runs against any CLI. afi-cli itself has to pass.</p>
   </a>
 </div>
 

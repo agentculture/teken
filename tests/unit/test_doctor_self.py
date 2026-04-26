@@ -69,6 +69,33 @@ def test_version_consistency_info_when_no_repo_root(monkeypatch: pytest.MonkeyPa
     assert result.severity == "info"
 
 
+def test_version_consistency_errors_on_non_table_project(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """[project] = "string" is valid TOML but invalid PEP 621.
+
+    Self-doctor must surface this as a structured error, not crash with
+    AttributeError when calling .get on a string.
+    """
+    (tmp_path / "pyproject.toml").write_text('project = "not-a-table"\n')
+    monkeypatch.setattr(sc, "_find_repo_root", lambda: tmp_path)
+    result = sc._check_version_consistency()
+    assert not result.passed
+    assert result.severity == "error"
+    assert "[project]" in result.evidence
+
+
+def test_version_consistency_handles_missing_project_table(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Missing [project] is benign drift; surface the version mismatch, do not crash."""
+    (tmp_path / "pyproject.toml").write_text("[build-system]\nrequires = []\n")
+    monkeypatch.setattr(sc, "_find_repo_root", lambda: tmp_path)
+    result = sc._check_version_consistency()
+    assert not result.passed
+    assert "None" in result.evidence
+
+
 def test_changelog_entry_passes_when_present(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

@@ -102,7 +102,20 @@ def _check_version_consistency() -> CheckResult:
             f"could not parse {pyproject}: {err}",
             remediation="fix the TOML syntax error in pyproject.toml",
         )
-    declared = data.get("project", {}).get("version")
+    project = data.get("project") if isinstance(data, dict) else None
+    if project is not None and not isinstance(project, dict):
+        return CheckResult(
+            BUNDLE,
+            "version_consistency",
+            False,
+            "error",
+            f"invalid {pyproject}: [project] must be a TOML table",
+            remediation=(
+                "rewrite the [project] section as a table per PEP 621 "
+                "(https://peps.python.org/pep-0621/)"
+            ),
+        )
+    declared = project.get("version") if isinstance(project, dict) else None
     if declared == __version__:
         return CheckResult(
             BUNDLE,

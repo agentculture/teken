@@ -87,3 +87,21 @@ def test_global_doctor_fix_emits_self_doctor_diagnostic() -> None:
     result = _run_afi("doctor", "--fix", cwd=REPO_ROOT)
     assert result.returncode == 0, result.stderr
     assert "self-doctor" in result.stderr.lower()
+
+
+def test_doctor_fix_and_dry_run_are_mutually_exclusive() -> None:
+    """`--fix` and `--dry-run` together must fail at parse time, not silently.
+
+    `--dry-run` is a preview of what `--fix` would do; combining them is
+    meaningless. argparse's mutually-exclusive group enforces it so the
+    contract is unambiguous (and no traceback leaks through).
+    """
+    result = _run_afi("doctor", "--fix", "--dry-run", cwd=REPO_ROOT)
+    assert result.returncode != 0
+    assert "Traceback" not in result.stderr
+
+
+def test_cli_doctor_fix_and_dry_run_are_mutually_exclusive() -> None:
+    result = _run_afi("cli", "doctor", str(REPO_ROOT), "--fix", "--dry-run", cwd=REPO_ROOT)
+    assert result.returncode != 0
+    assert "Traceback" not in result.stderr

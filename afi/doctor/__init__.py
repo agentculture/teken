@@ -9,11 +9,13 @@ no network); deeper black-box auditing of *target* CLIs is what
 
 Public surface:
 
-- :func:`run_self_diagnosis` — collect every self-check and return a flat
-  ``list[CheckResult]``.
-- :class:`Diagnosis` — convenience aggregate carrying ``healthy`` plus the
-  same list of results, used by the CLI's text/JSON renderers.
-- :func:`is_healthy` — returns True when no ``error``-severity check fails.
+- :func:`run_self_diagnosis` — collect every self-check and return a
+  :class:`Diagnosis` carrying the flat list of :class:`CheckResult` plus a
+  precomputed ``healthy`` flag.
+- :class:`Diagnosis` — aggregate (subject, healthy, checks) used by the
+  CLI's text/JSON renderers.
+- :func:`is_healthy` — returns True when no ``error``-severity check
+  failed; mirrors the ``afi cli doctor`` non-strict exit-code policy.
 """
 
 from __future__ import annotations
@@ -47,7 +49,7 @@ def is_healthy(results: list[CheckResult]) -> bool:
     """Healthy ⇔ no ``error``-severity check failed.
 
     ``warn`` and ``info`` failures do not flip the bit; they are advisory.
-    Mirrors the ``afi cli verify`` non-strict exit-code policy.
+    Mirrors the ``afi cli doctor`` non-strict exit-code policy.
     """
     return not any(not r.passed and r.severity == "error" for r in results)
 

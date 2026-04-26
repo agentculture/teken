@@ -117,12 +117,16 @@ def register(sub: argparse._SubParsersAction) -> None:
     )
     doctor.add_argument("path", nargs="?", default=".", help="Target project path (default: .).")
     doctor.add_argument("--json", action="store_true", help=_JSON_HELP)
-    doctor.add_argument(
+    # --fix and --dry-run are alternatives: --dry-run previews what --fix
+    # would do. Mutually exclusive at the argparse layer so passing both
+    # gives a clear error instead of silent precedence.
+    fix_group = doctor.add_mutually_exclusive_group()
+    fix_group.add_argument(
         "--fix",
         action="store_true",
         help="Apply auto-fixable remediations.",
     )
-    doctor.add_argument(
+    fix_group.add_argument(
         "--dry-run",
         action="store_true",
         dest="dry_run",

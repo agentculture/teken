@@ -146,7 +146,23 @@ def _resolve_tool_name(target_path: Path) -> str:
             message=f"invalid TOML in {pp}: {err}",
             remediation="fix the TOML syntax error in pyproject.toml",
         ) from err
-    scripts = data.get("project", {}).get("scripts", {})
+    project = data.get("project") if isinstance(data, dict) else None
+    if project is not None and not isinstance(project, dict):
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message=f"invalid {pp}: [project] must be a TOML table",
+            remediation=(
+                "rewrite the [project] section as a table per PEP 621 "
+                "(https://peps.python.org/pep-0621/)"
+            ),
+        )
+    scripts = project.get("scripts") if isinstance(project, dict) else None
+    if scripts is not None and not isinstance(scripts, dict):
+        raise AfiError(
+            code=EXIT_USER_ERROR,
+            message=f"invalid {pp}: [project.scripts] must be a TOML table",
+            remediation='rewrite [project.scripts] as a table of name = "module:func" entries',
+        )
     if not scripts:
         raise AfiError(
             code=EXIT_USER_ERROR,
@@ -291,12 +307,16 @@ def register(sub: argparse._SubParsersAction) -> None:
         help="Target project path. Omit to self-diagnose afi's own install.",
     )
     p.add_argument("--json", action="store_true", help=_JSON_HELP)
-    p.add_argument(
+    # --fix and --dry-run are alternatives, not orthogonal: --dry-run previews
+    # what --fix would do, so passing both is meaningless. Argparse rejects it
+    # with a clear error rather than silently picking one.
+    fix_group = p.add_mutually_exclusive_group()
+    fix_group.add_argument(
         "--fix",
         action="store_true",
         help="Apply auto-fixable remediations (target audits only).",
     )
-    p.add_argument(
+    fix_group.add_argument(
         "--dry-run",
         action="store_true",
         dest="dry_run",

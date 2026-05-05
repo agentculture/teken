@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/). This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-05-05
+
+### Added
+
+- `afi doctor --package <name>` and `afi cli doctor --package <name>`: resolve an editable-installed distribution to its source root via PEP 610 `direct_url.json` so an agent can audit a target tool from anywhere without knowing its filesystem location (issue #13).
+
+### Changed
+
+- `afi doctor` self-mode headline now reads `afi doctor: structural self-check passed (N/M). Run 'afi doctor <path>' to audit a target CLI.` instead of the bare `healthy: N/M passed, ...`. Target-audit headline is unchanged. Removes the "green light is over-confident" framing flagged in issue #13.
+
+### Fixed
+
+- `afi doctor`: clearer error when the positional argument is not a project root. The remediation now names both `afi doctor .` and `--package <name>` so an agent learns the contract from the diagnostic (issue #13).
+
 ## [0.5.0] - 2026-04-26
 
 ### Added

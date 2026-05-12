@@ -5,15 +5,22 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/). This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.6.3] - 2026-05-12
+## [0.7.0] - 2026-05-12
 
+### Added
+
+- Vendored `cicd` skill from steward (`.claude/skills/cicd/`) — `agex pr`-layered workflow with steward-derived `status` and `await` extensions. Resolves [#17](https://github.com/agentculture/afi-cli/issues/17).
+- Vendored `communicate` skill from steward (`.claude/skills/communicate/`) — cross-repo GitHub issue I/O (post/comment/fetch) plus Culture mesh messaging, backed by `agtag` for signature resolution. Resolves [#18](https://github.com/agentculture/afi-cli/issues/18).
+- `docs/skill-sources.md` ledger tracking upstream provenance and local divergence for each vendored skill.
+- `culture.yaml` declaring `afi-cli` as the agent nick (so `agtag` resolves issue signatures as `- afi-cli (Claude)` instead of falling back to the git remote basename).
+
+## [0.6.3] - 2026-05-12
 
 ### Added
 
 - SonarCloud pipeline: integrate scan step into tests workflow with coverage.xml input; add sonar-project.properties pointing at agentculture_afi-cli.
 
 ## [0.6.2] - 2026-05-06
-
 
 ### Changed
 

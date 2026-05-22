@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from afi.rubric._types import RunOutput, VerifyContext
-from afi.rubric.checks import doctor as doctor_checks
+from teken.rubric._types import RunOutput, VerifyContext
+from teken.rubric.checks import doctor as doctor_checks
 from tests.unit._fake_runner import FakeRunner
 
 _GOOD_PAYLOAD = {

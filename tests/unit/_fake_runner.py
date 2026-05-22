@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from afi.rubric._types import RunOutput
+from teken.rubric._types import RunOutput
 
 
 @dataclass

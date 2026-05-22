@@ -7,9 +7,25 @@ from pathlib import Path
 
 import pytest
 
-from afi import __version__
-from afi.doctor import _self_checks as sc
-from afi.doctor import is_healthy, run_self_diagnosis
+import teken
+from teken import __version__
+from teken.doctor import _self_checks as sc
+from teken.doctor import is_healthy, run_self_diagnosis
+
+
+def test_find_repo_root_accepts_legacy_afi_cli_name(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Self-doctor still locates a checkout whose pyproject uses the old name.
+
+    The distribution was renamed ``afi-cli`` → ``teken``; ``_find_repo_root``
+    accepts either so a stale checkout (or the wrapper) keeps self-diagnosing.
+    """
+    (tmp_path / "teken").mkdir()
+    (tmp_path / "teken" / "__init__.py").write_text("")
+    (tmp_path / "pyproject.toml").write_text('[project]\nname = "afi-cli"\nversion = "9.9.9"\n')
+    monkeypatch.setattr(teken, "__file__", str(tmp_path / "teken" / "__init__.py"))
+    assert sc._find_repo_root() == tmp_path
 
 
 def test_run_self_diagnosis_against_live_repo() -> None:
@@ -27,7 +43,7 @@ def test_run_self_diagnosis_against_live_repo() -> None:
 
 
 def test_is_healthy_only_considers_error_severity() -> None:
-    from afi.rubric._types import CheckResult
+    from teken.rubric._types import CheckResult
 
     warn_only = [
         CheckResult("self", "x", False, "warn", "...", remediation="..."),
@@ -43,7 +59,7 @@ def test_version_consistency_passes_when_pyproject_matches(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     pp = tmp_path / "pyproject.toml"
-    pp.write_text(f'[project]\nname = "afi-cli"\nversion = "{__version__}"\n')
+    pp.write_text(f'[project]\nname = "teken"\nversion = "{__version__}"\n')
     monkeypatch.setattr(sc, "_find_repo_root", lambda: tmp_path)
     result = sc._check_version_consistency()
     assert result.passed
@@ -54,7 +70,7 @@ def test_version_consistency_fails_on_drift(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     pp = tmp_path / "pyproject.toml"
-    pp.write_text('[project]\nname = "afi-cli"\nversion = "0.0.99-not-real"\n')
+    pp.write_text('[project]\nname = "teken"\nversion = "0.0.99-not-real"\n')
     monkeypatch.setattr(sc, "_find_repo_root", lambda: tmp_path)
     result = sc._check_version_consistency()
     assert not result.passed
@@ -137,7 +153,7 @@ def test_rubric_modules_loadable() -> None:
 
 def test_argparse_leaf_paths_excludes_nouns() -> None:
     """Nouns like ``cli`` are not leaves; their nested verbs are."""
-    from afi.cli import _build_parser
+    from teken.cli import _build_parser
 
     parser = _build_parser()
     leaves = sc._argparse_leaf_paths(parser)
@@ -150,18 +166,18 @@ def test_argparse_leaf_paths_excludes_nouns() -> None:
 
 
 def test_doctor_json_payload_has_bundle_seven_required_keys(tmp_path: Path) -> None:
-    """The diagnosis emitted by `afi doctor --json` must satisfy bundle 7's contract.
+    """The diagnosis emitted by `teken doctor --json` must satisfy bundle 7's contract.
 
     Renders the doctor verb's JSON shape directly from a fresh diagnosis
     so we don't depend on subprocess invocation; the rendering function
-    lives in ``afi.cli._commands.doctor``.
+    lives in ``teken.cli._commands.doctor``.
     """
-    from afi.cli._commands.doctor import _check_to_dict, _summarize
-    from afi.doctor import is_healthy
+    from teken.cli._commands.doctor import _check_to_dict, _summarize
+    from teken.doctor import is_healthy
 
     diagnosis = run_self_diagnosis()
     payload = {
-        "tool": "afi",
+        "tool": "teken",
         "subject": diagnosis.subject,
         "healthy": is_healthy(diagnosis.checks),
         "checks": [_check_to_dict(r) for r in diagnosis.checks],

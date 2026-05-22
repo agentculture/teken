@@ -1,4 +1,4 @@
-"""Guard test: ``afi cli cite`` must not touch anything outside ``.afi/``
+"""Guard test: ``teken cli cite`` must not touch anything outside ``.teken/``
 and the single ``.gitignore`` line.
 """
 
@@ -18,7 +18,7 @@ def _hash(p: Path) -> str:
 
 def _run_afi(*args: str, cwd: Path) -> subprocess.CompletedProcess[str]:
     return subprocess.run(  # noqa: S603
-        [sys.executable, "-m", "afi", *args],
+        [sys.executable, "-m", "teken", *args],
         cwd=cwd,
         capture_output=True,
         text=True,
@@ -47,14 +47,14 @@ def test_cite_does_not_touch_unrelated_files(tmp_path: Path) -> None:
     (tmp_path / "README.md").write_text("# demo\n")
     (tmp_path / "pyproject.toml").write_text('[project]\nname = "demo"\nversion="0"\n')
 
-    before = _snapshot(tmp_path, skip=(".afi", ".gitignore"))
+    before = _snapshot(tmp_path, skip=(".teken", ".gitignore"))
 
     result = _run_afi("cli", "cite", str(tmp_path), cwd=tmp_path)
     assert result.returncode == 0, result.stderr
 
-    after = _snapshot(tmp_path, skip=(".afi", ".gitignore"))
+    after = _snapshot(tmp_path, skip=(".teken", ".gitignore"))
     assert before == after, (
-        f"cite modified files outside .afi/ and .gitignore: "
+        f"cite modified files outside .teken/ and .gitignore: "
         f"{set(before.keys()) ^ set(after.keys())} / "
         f"changed: {[k for k in before if after.get(k) != before[k]]}"
     )
@@ -68,11 +68,11 @@ def test_cite_appends_gitignore_without_overwriting(tmp_path: Path) -> None:
 
     after = (tmp_path / ".gitignore").read_text()
     assert existing in after
-    assert ".afi/" in after
+    assert ".teken/" in after
 
 
 def test_cite_preserves_gitignore_when_afi_already_ignored(tmp_path: Path) -> None:
-    existing = "*.pyc\n.afi/\n"
+    existing = "*.pyc\n.teken/\n"
     (tmp_path / ".gitignore").write_text(existing)
 
     _run_afi("cli", "cite", str(tmp_path), cwd=tmp_path)

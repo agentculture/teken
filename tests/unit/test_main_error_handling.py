@@ -6,8 +6,8 @@ import argparse
 
 import pytest
 
-from afi.cli import _dispatch
-from afi.cli._errors import AfiError
+from teken.cli import _dispatch
+from teken.cli._errors import AfiError
 
 
 def _raising(err: Exception):

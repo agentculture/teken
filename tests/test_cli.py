@@ -1,4 +1,4 @@
-"""Smoke tests for the afi CLI entry point."""
+"""Smoke tests for the teken CLI entry point."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ import sys
 
 import pytest
 
-from afi import __version__
-from afi.cli import main
+from teken import __version__
+from teken.cli import main, main_afi_alias
 
 
 def test_version_flag(capsys: pytest.CaptureFixture[str]) -> None:
@@ -23,7 +23,7 @@ def test_no_args_prints_help(capsys: pytest.CaptureFixture[str]) -> None:
     rc = main([])
     assert rc == 0
     out = capsys.readouterr().out
-    assert "usage: afi" in out
+    assert "usage: teken" in out
 
 
 def test_learn_subcommand(capsys: pytest.CaptureFixture[str]) -> None:
@@ -35,12 +35,28 @@ def test_learn_subcommand(capsys: pytest.CaptureFixture[str]) -> None:
 
 
 def test_python_dash_m_invocation() -> None:
-    """`python -m afi --version` exits 0 and prints the version."""
+    """`python -m teken --version` exits 0 and prints the version."""
     result = subprocess.run(
-        [sys.executable, "-m", "afi", "--version"],
+        [sys.executable, "-m", "teken", "--version"],
         capture_output=True,
         text=True,
         check=False,
     )
     assert result.returncode == 0
     assert __version__ in result.stdout
+
+
+def test_afi_alias_warns_on_stderr_and_forwards(capsys: pytest.CaptureFixture[str]) -> None:
+    """The deprecated ``afi`` alias forwards to ``main`` and warns on stderr only.
+
+    The note MUST stay off stdout so ``--json`` consumers of the alias keep
+    getting clean, parseable output.
+    """
+    with pytest.raises(SystemExit) as exc:
+        main_afi_alias(["--version"])
+    assert exc.value.code == 0
+    captured = capsys.readouterr()
+    assert __version__ in captured.out  # forwarded command output
+    assert "deprecated" not in captured.out.lower()  # stdout stays clean
+    assert "deprecated" in captured.err.lower()
+    assert "afi" in captured.err and "teken" in captured.err

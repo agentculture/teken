@@ -1,13 +1,13 @@
-"""Acceptance gate: afi-cli must pass its own seven-bundle rubric and self-doctor.
+"""Acceptance gate: teken must pass its own seven-bundle rubric and self-doctor.
 
-This is what makes afi a first citizen of the rubric it publishes. If any
+This is what makes teken a first citizen of the rubric it publishes. If any
 rubric check regresses — ``learn`` drops below 200 chars, ``explain``
 loses an entry, an error handler swallows the traceback, the new
 ``doctor`` verb breaks — this test fails and blocks the commit.
 
 The rubric runs via subprocess: a :class:`VerifyContext` is built pointed
-at the repo root, with a :class:`SubprocessRunner` that invokes ``afi``
-via the dev venv's ``afi`` script.
+at the repo root, with a :class:`SubprocessRunner` that invokes ``teken``
+via the dev venv's ``teken`` script.
 
 The self-doctor runs in-process (no subprocess) so we also assert it
 returns ``healthy=True`` against the live source tree — a faster signal
@@ -18,10 +18,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from afi.doctor import run_self_diagnosis
-from afi.rubric import run_rubric
-from afi.rubric._runner import SubprocessRunner
-from afi.rubric._types import VerifyContext
+from teken.doctor import run_self_diagnosis
+from teken.rubric import run_rubric
+from teken.rubric._runner import SubprocessRunner
+from teken.rubric._types import VerifyContext
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -39,8 +39,8 @@ EXPECTED_BUNDLES = {
 def test_self_verify_passes_every_bundle() -> None:
     ctx = VerifyContext(
         target_path=REPO_ROOT,
-        tool_name="afi",
-        runner=SubprocessRunner(cwd=REPO_ROOT, tool_name="afi"),
+        tool_name="teken",
+        runner=SubprocessRunner(cwd=REPO_ROOT, tool_name="teken"),
     )
 
     results = run_rubric(ctx)
@@ -54,8 +54,8 @@ def test_self_verify_passes_every_bundle() -> None:
 def test_self_verify_covers_all_seven_bundles() -> None:
     ctx = VerifyContext(
         target_path=REPO_ROOT,
-        tool_name="afi",
-        runner=SubprocessRunner(cwd=REPO_ROOT, tool_name="afi"),
+        tool_name="teken",
+        runner=SubprocessRunner(cwd=REPO_ROOT, tool_name="teken"),
     )
 
     results = run_rubric(ctx)

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/). This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-05-22
+
+### Added
+
+- `afi` retained as a deprecated CLI alias: it prints a one-line deprecation notice to stderr, then forwards to `teken`.
+- `afi-cli` retained as a thin PyPI compatibility wrapper that depends on `teken==<version>`, so `uv tool install afi-cli` keeps working and installs `teken`.
+
+### Changed
+
+- **Breaking:** Renamed the project from `afi` to `teken` (Hebrew תֶּקֶן, "standard"). The canonical PyPI distribution and the import package are now `teken`; the primary CLI command is `teken`.
+- Cited reference trees now write to `.teken/` instead of `.afi/` (existing `.afi/` trees are still detected on read for backward compatibility).
+- Removed `python -m afi` — use `python -m teken` (the `afi` console command still works as an alias).
+
 ## [0.7.0] - 2026-05-12
 
 ### Added
@@ -126,7 +139,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - README.md and CLAUDE.md: link the two new docs so humans and future Claude sessions read the org context before making design decisions.
-- __Policy:__ every PR now bumps the version, even docs-only or trivial ones. CLAUDE.md updated, and `.github/workflows/tests.yml` version-check gate no longer skips when only docs/config change. PyPI history and `CHANGELOG.md` now track each merged PR 1:1.
+- **Policy:** every PR now bumps the version, even docs-only or trivial ones. CLAUDE.md updated, and `.github/workflows/tests.yml` version-check gate no longer skips when only docs/config change. PyPI history and `CHANGELOG.md` now track each merged PR 1:1.
 
 ## [0.1.1] - 2026-04-22
 

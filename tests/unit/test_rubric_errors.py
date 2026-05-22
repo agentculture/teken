@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from afi.rubric._types import RunOutput, VerifyContext
-from afi.rubric.checks import errors as errors_bundle
-from afi.rubric.checks.errors import BOGUS
+from teken.rubric._types import RunOutput, VerifyContext
+from teken.rubric.checks import errors as errors_bundle
+from teken.rubric.checks.errors import BOGUS
 from tests.unit._fake_runner import FakeRunner
 
 GOOD_LEARN_WITH_EXIT_CODES = (

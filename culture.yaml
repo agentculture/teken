@@ -1,3 +1,3 @@
 agents:
-- suffix: afi-cli
+- suffix: teken
   backend: claude

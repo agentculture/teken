@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from afi.rubric._types import RunOutput, VerifyContext
-from afi.rubric.checks import json_output
+from teken.rubric._types import RunOutput, VerifyContext
+from teken.rubric.checks import json_output
 from tests.unit._fake_runner import FakeRunner
 
 

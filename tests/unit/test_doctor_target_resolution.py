@@ -16,8 +16,8 @@ from urllib.parse import quote
 
 import pytest
 
-from afi.cli._commands.doctor import _resolve_package_source_root
-from afi.cli._errors import AfiError
+from teken.cli._commands.doctor import _resolve_package_source_root
+from teken.cli._errors import AfiError
 
 
 class _FakeDist:
@@ -49,13 +49,13 @@ def _patch_distribution(monkeypatch: pytest.MonkeyPatch, payload: Any) -> None:
             raise payload()
 
         monkeypatch.setattr(
-            "afi.cli._commands.doctor._metadata.distribution",
+            "teken.cli._commands.doctor._metadata.distribution",
             _raise,
         )
         return
     fake = _FakeDist(payload)
     monkeypatch.setattr(
-        "afi.cli._commands.doctor._metadata.distribution",
+        "teken.cli._commands.doctor._metadata.distribution",
         lambda _name: fake,
     )
 

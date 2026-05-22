@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from afi.rubric._types import RunOutput, VerifyContext
-from afi.rubric.checks import explain_cmd
-from afi.rubric.checks.explain_cmd import BOGUS_PATH
+from teken.rubric._types import RunOutput, VerifyContext
+from teken.rubric.checks import explain_cmd
+from teken.rubric.checks.explain_cmd import BOGUS_PATH
 from tests.unit._fake_runner import FakeRunner
 
 

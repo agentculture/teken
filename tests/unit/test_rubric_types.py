@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from afi.rubric._types import CheckResult, RunOutput, VerifyContext
+from teken.rubric._types import CheckResult, RunOutput, VerifyContext
 
 
 class _NoopRunner:

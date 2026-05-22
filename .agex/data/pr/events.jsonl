@@ -1,0 +1,5 @@
+{"ts":"2026-05-12T05:07:51.790191+00:00","type":"pr_read","pr":19,"comment_count":7,"threads_unresolved":3,"ci_state":"ok"}
+{"ts":"2026-05-12T05:21:58.781816+00:00","type":"pr_reply","pr":19,"thread_id":"PRRT_kwDOSGEynM6BTAaJ","in_reply_to":null}
+{"ts":"2026-05-12T05:22:00.768056+00:00","type":"pr_reply","pr":19,"thread_id":"PRRT_kwDOSGEynM6BTAaK","in_reply_to":null}
+{"ts":"2026-05-12T05:22:02.526061+00:00","type":"pr_reply","pr":19,"thread_id":"PRRT_kwDOSGEynM6BTAaN","in_reply_to":null}
+{"ts":"2026-05-12T05:22:03.040672+00:00","type":"pr_batch_replied","pr":19,"count":3,"resolved":3}

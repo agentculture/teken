@@ -1,6 +1,6 @@
-"""CLI smoke tests for ``afi cli overview`` and ``afi overview``.
+"""CLI smoke tests for ``teken cli overview`` and ``teken overview``.
 
-Drives afi in-process via :func:`afi.cli.main` (fast, captured via capsys).
+Drives teken in-process via :func:`teken.cli.main` (fast, captured via capsys).
 Subprocess-level coverage of the same surface lives in
 ``tests/integration/test_cli_commands.py``.
 """
@@ -12,14 +12,14 @@ from pathlib import Path
 
 import pytest
 
-from afi.cli import main
+from teken.cli import main
 
 
 def test_cli_overview_zero_target_renders(capsys: pytest.CaptureFixture[str]) -> None:
     rc = main(["cli", "overview"])
     out = capsys.readouterr().out
     assert rc == 0
-    assert "afi default template" in out
+    assert "teken default template" in out
     # Tokens are surfaced as guidance for integrating agents.
     assert "{{slug}}" in out
 
@@ -27,7 +27,7 @@ def test_cli_overview_zero_target_renders(capsys: pytest.CaptureFixture[str]) ->
 def test_cli_overview_on_real_target_reports_surface(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    # Inspect afi itself — rich target with all four sections.
+    # Inspect teken itself — rich target with all four sections.
     rc = main(["cli", "overview", str(Path.cwd())])
     out = capsys.readouterr().out
     assert rc == 0
@@ -76,4 +76,4 @@ def test_cli_overview_missing_path_graceful(
     out = capsys.readouterr().out
     # Read-only verbs fall back and succeed; they do NOT hard-fail.
     assert rc == 0
-    assert "afi default template" in out
+    assert "teken default template" in out

@@ -1,6 +1,6 @@
 [project]
-name = "afi-cli"
-version = "0.7.0"
+name = "teken"
+version = "0.8.0"
 description = "Agent First Interface — scaffold CLI, MCP, and HTTP interfaces for agent-first tools."
 readme = "README.md"
 license = "MIT"
@@ -16,18 +16,20 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/agentculture/afi-cli"
-Issues = "https://github.com/agentculture/afi-cli/issues"
+Homepage = "https://github.com/agentculture/teken"
+Issues = "https://github.com/agentculture/teken/issues"
 
 [project.scripts]
-afi = "afi.cli:main"
+teken = "teken.cli:main"
+# Deprecated alias for the renamed command; prints a stderr note then forwards.
+afi = "teken.cli:main_afi_alias"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["afi"]
+packages = ["teken"]
 
 [dependency-groups]
 dev = [
@@ -46,8 +48,8 @@ dev = [
 ]
 
 [tool.coverage.run]
-source = ["afi"]
-omit = ["afi/__pycache__/*"]
+source = ["teken"]
+omit = ["teken/__pycache__/*"]
 
 [tool.coverage.report]
 fail_under = 70
@@ -61,15 +63,15 @@ exclude_lines = [
 [tool.isort]
 profile = "black"
 line_length = 100
-known_first_party = ["afi"]
-extend_skip_glob = ["afi/cite/references/**"]
+known_first_party = ["teken"]
+extend_skip_glob = ["teken/cite/references/**"]
 
 [tool.black]
 line-length = 100
 target-version = ["py312"]
 extend-exclude = '''
 /(
-    afi/cite/references
+    teken/cite/references
 )/
 '''
 

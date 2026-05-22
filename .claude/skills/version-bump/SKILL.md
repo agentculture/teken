@@ -54,9 +54,12 @@ Pass via stdin. All fields are optional — only non-empty sections are rendered
 ## What It Updates
 
 1. `pyproject.toml` — the `version = "x.y.z"` field (single source of truth;
-   `afi/__init__.py` reads it via `importlib.metadata`, so there is no
+   `teken/__init__.py` reads it via `importlib.metadata`, so there is no
    separate `__version__` string to keep in sync).
 2. `CHANGELOG.md` — inserts a new `## [x.y.z] - YYYY-MM-DD` entry at the top.
+3. `packaging/afi-cli/pyproject.toml` — the compatibility wrapper's own
+   `version` and its `teken==<version>` dependency pin, kept in lockstep with
+   the root version (a CI guard in `tests.yml` fails the PR on drift).
 
 ## Workflow
 

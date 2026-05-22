@@ -1,10 +1,10 @@
-"""Tests for :mod:`afi.cli._errors`."""
+"""Tests for :mod:`teken.cli._errors`."""
 
 from __future__ import annotations
 
 import pytest
 
-from afi.cli._errors import (
+from teken.cli._errors import (
     EXIT_ENV_ERROR,
     EXIT_SUCCESS,
     EXIT_USER_ERROR,
@@ -37,7 +37,7 @@ def test_afi_error_to_dict_shape() -> None:
 
 
 def test_exit_codes_documented() -> None:
-    # Frozen policy — part of the public contract documented in `afi learn`.
+    # Frozen policy — part of the public contract documented in `teken learn`.
     assert EXIT_SUCCESS == 0
     assert EXIT_USER_ERROR == 1
     assert EXIT_ENV_ERROR == 2

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 Format follows [Keep a Changelog](https://keepachangelog.com/). This project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] - 2026-05-29
+
+### Changed
+
+- CI now blocks on the SonarCloud quality gate (`sonar.qualitygate.wait=true` in `sonar-project.properties`), matching the sibling `convertible` repo — a red gate (coverage regression on new code, new bugs/vulnerabilities) fails the Tests workflow. The scan/gate stays a no-op on token-less repos and fork PRs.
+
+### Fixed
+
+- Documented `python3` as a runtime dependency of the vendored `assign-to-workforce` skill (its `split-plan` subcommand renders the table via an inline `python3` program) in `docs/skill-sources.md`, resolving a Qodo review finding on PR #25. The vendored script stays verbatim; a preflight `python3` guard with a clear error is deferred upstream to devague per the skills-portability rule.
+
 ## [0.10.0] - 2026-05-29
 
 ### Added

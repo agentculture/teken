@@ -3,3 +3,11 @@
 {"ts":"2026-05-12T05:22:00.768056+00:00","type":"pr_reply","pr":19,"thread_id":"PRRT_kwDOSGEynM6BTAaK","in_reply_to":null}
 {"ts":"2026-05-12T05:22:02.526061+00:00","type":"pr_reply","pr":19,"thread_id":"PRRT_kwDOSGEynM6BTAaN","in_reply_to":null}
 {"ts":"2026-05-12T05:22:03.040672+00:00","type":"pr_batch_replied","pr":19,"count":3,"resolved":3}
+{"ts":"2026-05-29T14:24:33.303473+00:00","type":"pr_opened","pr":25,"title":"Vendor the devague workflow trio \u2014 think / spec-to-plan / assign-to-workforce (#23)"}
+{"ts":"2026-05-29T14:24:35.548015+00:00","type":"pr_review_triggered","pr":25,"command":"/agentic_review"}
+{"ts":"2026-05-29T14:25:39.499301+00:00","type":"readiness_arrived","pr":25,"waited_secs":60}
+{"ts":"2026-05-29T14:25:46.015816+00:00","type":"pr_read","pr":25,"comment_count":4,"threads_unresolved":0,"ci_state":"ok"}
+{"ts":"2026-05-29T15:17:59.304269+00:00","type":"pr_opened","pr":26,"title":"ci: SonarCloud quality gate + document python3 dep (Qodo #25 follow-up)"}
+{"ts":"2026-05-29T15:18:01.416319+00:00","type":"pr_review_triggered","pr":26,"command":"/agentic_review"}
+{"ts":"2026-05-29T15:19:05.059286+00:00","type":"readiness_arrived","pr":26,"waited_secs":60}
+{"ts":"2026-05-29T15:19:10.407256+00:00","type":"pr_read","pr":26,"comment_count":4,"threads_unresolved":0,"ci_state":"ok"}

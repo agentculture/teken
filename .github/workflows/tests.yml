@@ -46,6 +46,9 @@ jobs:
 
       - name: SonarCloud Scan
         if: env.SONAR_TOKEN_PRESENT == 'true'
+        # `sonar.qualitygate.wait=true` polls the gate (scanner default 300s); this
+        # hard-bounds the whole step so a slow/hung gate or action can't stall CI.
+        timeout-minutes: 10
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -13,7 +13,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- CI now blocks on the SonarCloud quality gate (`sonar.qualitygate.wait=true` in `sonar-project.properties`), matching the sibling `convertible` repo — a red gate (coverage regression on new code, new bugs/vulnerabilities) fails the Tests workflow. The scan/gate stays a no-op on token-less repos and fork PRs.
+- CI now blocks on the SonarCloud quality gate (`sonar.qualitygate.wait=true` in `sonar-project.properties`), matching the sibling `convertible` repo — a red gate (coverage regression on new code, new bugs/vulnerabilities) fails the Tests workflow. The scan/gate stays a no-op on token-less repos and fork PRs, and the Scan step is bounded by a 10-minute `timeout-minutes` so a slow gate can't stall CI.
 
 ### Fixed
 

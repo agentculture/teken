@@ -7,3 +7,7 @@
 {"ts":"2026-05-29T14:24:35.548015+00:00","type":"pr_review_triggered","pr":25,"command":"/agentic_review"}
 {"ts":"2026-05-29T14:25:39.499301+00:00","type":"readiness_arrived","pr":25,"waited_secs":60}
 {"ts":"2026-05-29T14:25:46.015816+00:00","type":"pr_read","pr":25,"comment_count":4,"threads_unresolved":0,"ci_state":"ok"}
+{"ts":"2026-05-29T15:17:59.304269+00:00","type":"pr_opened","pr":26,"title":"ci: SonarCloud quality gate + document python3 dep (Qodo #25 follow-up)"}
+{"ts":"2026-05-29T15:18:01.416319+00:00","type":"pr_review_triggered","pr":26,"command":"/agentic_review"}
+{"ts":"2026-05-29T15:19:05.059286+00:00","type":"readiness_arrived","pr":26,"waited_secs":60}
+{"ts":"2026-05-29T15:19:10.407256+00:00","type":"pr_read","pr":26,"comment_count":4,"threads_unresolved":0,"ci_state":"ok"}
